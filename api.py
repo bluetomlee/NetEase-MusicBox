@@ -124,3 +124,62 @@ class Api:
     def song_detail(self, music_id):
         action = "http://music.163.com/api/song/detail/?id=" + music_id + "&ids=[" + music_id + "]"
         return self.httpRequest('GET', action)
+
+    def dig_info(self, data ,dig_type):
+        if dig_type == 'songs':
+            temp = []
+            for i in range(0, min(10, len(data) ) ):
+                song_info = {
+                    'song_id': data[i]['id'],
+                    'artist': [],
+                    'song_name': data[i]['name'],
+                    'album_name': data[i]['album']['name'],
+                    'mp3_url': data[i]['mp3Url']   
+                }
+                if 'artist' in data[i]:
+                    song_info['artist'] = data[i]['artist']
+                elif 'artists' in data[i]:
+                    for j in range(0, len(data[i]['artists']) ):
+                        song_info['artist'].append( data[i]['artists'][j]['name'] )
+                    song_info['artist'] = ', '.join( song_info['artist'] )
+                else:
+                    song_info['artist'] = '未知艺术家'
+
+                temp.append(song_info)
+
+            return temp
+
+        if dig_type == 'artists':
+            temp = []
+            for i in range(0, min(10, len(data) ) ):
+                artists_info = {
+                    'artist_id': data[i]['id'],
+                    'artists_name': data[i]['name'],
+                    'alias': ''.join(data[i]['alias'])
+                }
+                temp.append(artists_info)
+
+            return temp
+
+        if dig_type == 'albums':
+            temp = []
+            for i in range(0, min(10, len(data) ) ):
+                albums_info = {
+                    'album_id': data[i]['id'],
+                    'albums_name': data[i]['name'],
+                    'artists_name': data[i]['artist']['name']
+                }
+                temp.append(albums_info)
+            return temp
+
+        if dig_type == 'playlists':
+            temp = []
+            for i in range(0, min(10, len(data) ) ):
+                playlists_info = {
+                    'playlist_id': data[i]['id'],
+                    'playlists_name': data[i]['name'],
+                    'creator_name': data[i]['creator']['nickname']
+                }
+                temp.append(playlists_info)        
+
+            return temp
