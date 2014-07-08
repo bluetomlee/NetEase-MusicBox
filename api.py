@@ -71,12 +71,12 @@ class Api:
         return self.httpRequest('POST', action, self.data)
 
     # 新碟上架 http://music.163.com/#/discover/album/
-    def new_albums(self, offset=0, limit=10):
+    def new_albums(self, offset=0, limit=50):
         action = 'http://music.163.com/api/album/new?area=ALL&offset=' + str(offset) + '&total=true&limit=' + str(limit)
         return self.httpRequest('GET', action)
 
     # 歌单（网友精选碟） hot||new http://music.163.com/#/discover/playlist/
-    def top_playlists(self, order='hot', offset=0, limit=8):
+    def top_playlists(self, order='hot', offset=0, limit=50):
         action = 'http://music.163.com/api/playlist/list?order=' + str(order) + '&offset=' + str(offset) + '&total=' + ('true' if offset else 'false') + '&limit=' + str(limit)
         return self.httpRequest('GET', action)
 
@@ -86,12 +86,12 @@ class Api:
         return self.httpRequest('GET', action)
 
     # 热门歌手 http://music.163.com/#/discover/artist/
-    def top_artists(self, offset=0, limit=20):
+    def top_artists(self, offset=0, limit=100):
         action = 'http://music.163.com/api/artist/top?offset=' + str(offset) + '&total=false&limit=' + str(limit)
         return self.httpRequest('GET', action)
 
     # 热门单曲 http://music.163.com/#/discover/toplist 50
-    def top_songlist(self, offset=0, limit=20):
+    def top_songlist(self, offset=0, limit=100):
         action = 'http://music.163.com/discover/toplist'
         connection = requests.get(action, headers=self.header, timeout=5)
         connection.encoding = 'UTF-8'
@@ -128,7 +128,7 @@ class Api:
     def dig_info(self, data ,dig_type):
         if dig_type == 'songs':
             temp = []
-            for i in range(0, min(10, len(data) ) ):
+            for i in range(0, len(data) ):
                 song_info = {
                     'song_id': data[i]['id'],
                     'artist': [],
@@ -151,7 +151,7 @@ class Api:
 
         if dig_type == 'artists':
             temp = []
-            for i in range(0, min(10, len(data) ) ):
+            for i in range(0, len(data) ):
                 artists_info = {
                     'artist_id': data[i]['id'],
                     'artists_name': data[i]['name'],
@@ -163,7 +163,7 @@ class Api:
 
         if dig_type == 'albums':
             temp = []
-            for i in range(0, min(10, len(data) ) ):
+            for i in range(0, len(data) ):
                 albums_info = {
                     'album_id': data[i]['id'],
                     'albums_name': data[i]['name'],
@@ -174,7 +174,7 @@ class Api:
 
         if dig_type == 'playlists':
             temp = []
-            for i in range(0, min(10, len(data) ) ):
+            for i in range(0, len(data) ):
                 playlists_info = {
                     'playlist_id': data[i]['id'],
                     'playlists_name': data[i]['name'],
