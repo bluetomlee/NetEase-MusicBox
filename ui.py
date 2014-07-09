@@ -27,51 +27,51 @@ class Ui:
         self.screen.addstr(1, 19, song_name + '   -   ' + artist + '  < ' + album_name + ' >', curses.color_pair(2))
     	self.screen.refresh() 	
 
-    def build_menu(self, menus, menu_offset, menu_index, build, step):
+    def build_menu(self, datatype, title, datalist, offset, index, step):
     	# keep playing info in line 1
         self.screen.move(4,1)
         self.screen.clrtobot()
-        self.screen.addstr(4, 19, menus['title'], curses.color_pair(1))
+        self.screen.addstr(4, 19, title, curses.color_pair(1))
 
-        if len(menus[build]) == 0:
+        if len(datalist) == 0:
             self.screen.addstr(8, 19, '未找到搜索结果 -，-')
 
         else:
-            if build == 'main':
-                for i in range( menu_offset, min( len(menus['main']), menu_offset+step) ):
-                    if i == menu_index:
-                        self.screen.addstr(i - menu_offset +8, 16, '>> ' + str(i+1) + '. ' + menus['main'][i], curses.color_pair(2))
+            if datatype == 'main':
+                for i in range( offset, min( len(datalist), offset+step) ):
+                    if i == index:
+                        self.screen.addstr(i - offset +8, 16, '>> ' + str(i+1) + '. ' + datalist[i], curses.color_pair(2))
                     else:
-                        self.screen.addstr(i - menu_offset +8, 19, str(i+1) + '. ' + menus['main'][i])
+                        self.screen.addstr(i - offset +8, 19, str(i+1) + '. ' + datalist[i])
 
-            elif build == 'songs':
-                for i in range(menu_offset, min( len(menus['songs']), menu_offset+step) ):
+            elif datatype == 'songs':
+                for i in range(offset, min( len(datalist), offset+step) ):
                     # this item is focus
-                    if i == menu_index:
-                        self.screen.addstr(i - menu_offset +8, 16, '>> ' + str(i+1) + '. ' + menus['songs'][i]['song_name'] + '   -   ' + menus['songs'][i]['artist'] + '  < ' + menus['songs'][i]['album_name'] + ' >', curses.color_pair(2))
+                    if i == index:
+                        self.screen.addstr(i - offset +8, 16, '>> ' + str(i+1) + '. ' + datalist[i]['song_name'] + '   -   ' + datalist[i]['artist'] + '  < ' + datalist[i]['album_name'] + ' >', curses.color_pair(2))
                     else:
-                        self.screen.addstr(i - menu_offset +8, 19, str(i+1) + '. ' + menus['songs'][i]['song_name'] + '   -   ' + menus['songs'][i]['artist'] + '  < ' + menus['songs'][i]['album_name'] + ' >')
+                        self.screen.addstr(i - offset +8, 19, str(i+1) + '. ' + datalist[i]['song_name'] + '   -   ' + datalist[i]['artist'] + '  < ' + datalist[i]['album_name'] + ' >')
             
-            elif build == 'artists':
-                for i in range(menu_offset, min( len(menus['artists']), menu_offset+step) ):
-                    if i == menu_index:
-                        self.screen.addstr(i - menu_offset +8, 16, '>> ' + str(i+1) + '. ' + menus['artists'][i]['artists_name'] + '   -   ' + str(menus['artists'][i]['alias']), curses.color_pair(2))
+            elif datatype == 'artists':
+                for i in range(offset, min( len(datalist), offset+step) ):
+                    if i == index:
+                        self.screen.addstr(i - offset +8, 16, '>> ' + str(i+1) + '. ' + datalist[i]['artists_name'] + '   -   ' + str(datalist[i]['alias']), curses.color_pair(2))
                     else:
-                        self.screen.addstr(i - menu_offset +8, 19, str(i+1) + '. ' + menus['artists'][i]['artists_name'] + '   -   ' + menus['artists'][i]['alias'])
+                        self.screen.addstr(i - offset +8, 19, str(i+1) + '. ' + datalist[i]['artists_name'] + '   -   ' + datalist[i]['alias'])
 
-            elif build == 'albums':
-                for i in range(menu_offset, min( len(menus['albums']), menu_offset+step) ):
-                    if i == menu_index:
-                        self.screen.addstr(i - menu_offset +8, 16, '>> ' + str(i+1) + '. ' + menus['albums'][i]['albums_name'] + '   -   ' + menus['albums'][i]['artists_name'], curses.color_pair(2))
+            elif datatype == 'albums':
+                for i in range(offset, min( len(datalist), offset+step) ):
+                    if i == index:
+                        self.screen.addstr(i - offset +8, 16, '>> ' + str(i+1) + '. ' + datalist[i]['albums_name'] + '   -   ' + datalist[i]['artists_name'], curses.color_pair(2))
                     else:
-                        self.screen.addstr(i - menu_offset +8, 19, str(i+1) + '. ' + menus['albums'][i]['albums_name'] + '   -   ' + menus['albums'][i]['artists_name'])
+                        self.screen.addstr(i - offset +8, 19, str(i+1) + '. ' + datalist[i]['albums_name'] + '   -   ' + datalist[i]['artists_name'])
 
-            elif build == 'playlists':
-                for i in range(menu_offset, min( len(menus['playlists']), menu_offset+step) ):
-                    if i == menu_index:
-                        self.screen.addstr(i - menu_offset +8, 16, '>> ' + str(i+1) + '. ' + menus['playlists'][i]['playlists_name'] + '   -   ' + menus['playlists'][i]['creator_name'], curses.color_pair(2))
+            elif datatype == 'playlists':
+                for i in range(offset, min( len(datalist), offset+step) ):
+                    if i == index:
+                        self.screen.addstr(i - offset +8, 16, '>> ' + str(i+1) + '. ' + datalist[i]['playlists_name'] + '   -   ' + datalist[i]['creator_name'], curses.color_pair(2))
                     else:
-                        self.screen.addstr(i - menu_offset +8, 19, str(i+1) + '. ' + menus['playlists'][i]['playlists_name'] + '   -   ' + menus['playlists'][i]['creator_name'])
+                        self.screen.addstr(i - offset +8, 19, str(i+1) + '. ' + datalist[i]['playlists_name'] + '   -   ' + datalist[i]['creator_name'])
 
         self.screen.refresh()    
 

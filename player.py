@@ -9,6 +9,8 @@
 import subprocess
 import threading
 import time
+import os
+import signal
 from ui import Ui
 
 # carousel x in [left, right]
@@ -21,6 +23,7 @@ class Player:
         self.popen_handler = None
         # flag stop, prevent thread start
         self.playing_flag = False
+        self.pause_flag = False
         self.songs = []
         self.idx = 0
 
@@ -28,7 +31,7 @@ class Player:
         """
         Runs the given args in a subprocess.Popen, and then calls the function
         onExit when the subprocess completes.
-        onExit is a callable object, and popenArgs is a list/tuple of args that 
+        onExit is a callable object, and popenArgs is a lists/tuple of args that 
         would give to subprocess.Popen.
         """
         def runInThread(onExit, popenArgs):
@@ -51,9 +54,12 @@ class Player:
 
     def play(self, songs, idx):
 
-        # if same playlist, same song , stop it
+        # if same playlists, same song , stop it
         if idx == self.idx and songs == self.songs:
-            self.stop()
+            if self.pause_flag:
+                self.resume()
+            else:
+                self.pause()
 
         else:
             self.songs = songs
@@ -78,6 +84,14 @@ class Player:
         if self.playing_flag:
             self.playing_flag = False
             self.popen_handler.kill()
+
+    def pause(self):
+        self.pause_flag = True
+        os.kill(self.popen_handler.pid, signal.SIGSTOP)
+
+    def resume(self):
+        self.pause_flag = False
+        os.kill(self.popen_handler.pid, signal.SIGCONT)
 
     def next(self):
         self.stop()
