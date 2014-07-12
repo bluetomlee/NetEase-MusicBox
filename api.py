@@ -1,39 +1,34 @@
 #!/usr/bin/env python
 #encoding: UTF-8
 '''
-网易云音乐Api
+网易云音乐 Api
 '''
 
 import re
 import json
 import requests
+import hashlib
 
+# list去重
+def uniq(arr):
+    arr2 = list(set(arr))
+    arr2.sort(key=arr.index)
+    return arr2
 
-class Api:
+class NetEase:
     def __init__(self):
         self.header = {
-            # 'Accept': '*/*',
-            # 'Accept-Encoding': 'gzip,deflate,sdch',
-            # 'Accept-Language': 'zh-CN,zh;q=0.8,gl;q=0.6,zh-TW;q=0.4',
-            # 'Connection': 'keep-alive',
-            # 'Content-Type': 'application/x-www-form-urlencoded',
-            # 'DNT': 1,
-            # 'Host': 'music.163.com',
-            # 'Origin': 'http://music.163.com',
+            'Accept': '*/*',
+            'Accept-Encoding': 'gzip,deflate,sdch',
+            'Accept-Language': 'zh-CN,zh;q=0.8,gl;q=0.6,zh-TW;q=0.4',
+            'Connection': 'keep-alive',
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Host': 'music.163.com',
             'Referer': 'http://music.163.com/search/',
-            # 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.152 Safari/537.36'
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.152 Safari/537.36'
         }
-
         self.cookies = {
             'appver': '1.5.2'
-        }
-
-        self.data = {
-            's': '',
-            'type': 1,
-            'offset': 0,
-            'total': 'true',
-            'limit': 60
         }
 
     def httpRequest(self, method, action, query=None, urlencoded=None, callback=None, timeout=None):
@@ -46,7 +41,6 @@ class Api:
                 connection = requests.post(
                     action,
                     data=query,
-                    # cookies=self.cookies,
                     headers=self.header,
                     timeout=5
                 )
@@ -63,32 +57,72 @@ class Api:
             connection = json.loads(connection.text)
             return connection
 
+    # 登录
+    def login(self, username, password):
+        action = 'http://music.163.com/api/login/'
+        data = {
+            'username': username,
+            'password': hashlib.md5( password ).hexdigest(),
+            'rememberLogin': 'true'
+        }
+        return self.httpRequest('POST', action, data)
+
+    # 用户歌单
+    def user_playlist(self, uid, offset=0, limit=100):
+        action = 'http://music.163.com/api/user/playlist/?offset=' + str(offset) + '&limit=' + str(limit) + '&uid=' + str(uid)
+        data = self.httpRequest('GET', action)
+        try:
+            return data['playlist']
+        except:
+            return []
+
     # 搜索单曲(1)，歌手(100)，专辑(10)，歌单(1000)，用户(1002) *(type)*
-    def search(self, s, stype=1):
+    def search(self, s, stype=1, offset=0, total='true', limit=60):
         action = 'http://music.163.com/api/search/get/web'
-        self.data['s'] = s
-        self.data['type'] = stype
-        return self.httpRequest('POST', action, self.data)
+        data = {
+            's': s,
+            'type': stype,
+            'offset': offset,
+            'total': total,
+            'limit': 60
+        }
+        return self.httpRequest('POST', action, data)
 
     # 新碟上架 http://music.163.com/#/discover/album/
     def new_albums(self, offset=0, limit=50):
         action = 'http://music.163.com/api/album/new?area=ALL&offset=' + str(offset) + '&total=true&limit=' + str(limit)
-        return self.httpRequest('GET', action)
+        data = self.httpRequest('GET', action)
+        try:
+            return data['albums']
+        except:
+            return []
 
     # 歌单（网友精选碟） hot||new http://music.163.com/#/discover/playlist/
-    def top_playlists(self, order='hot', offset=0, limit=50):
-        action = 'http://music.163.com/api/playlist/list?order=' + str(order) + '&offset=' + str(offset) + '&total=' + ('true' if offset else 'false') + '&limit=' + str(limit)
-        return self.httpRequest('GET', action)
+    def top_playlists(self, category='全部', order='hot', offset=0, limit=50):
+        action = 'http://music.163.com/api/playlist/list?cat=' + category + '&order=' + order + '&offset=' + str(offset) + '&total=' + ('true' if offset else 'false') + '&limit=' + str(limit)
+        data = self.httpRequest('GET', action)
+        try:
+            return data['playlists']
+        except:
+            return []
 
     # 歌单详情
     def playlist_detail(self, playlist_id):
         action = 'http://music.163.com/api/playlist/detail?id=' + str(playlist_id)
-        return self.httpRequest('GET', action)
+        data = self.httpRequest('GET', action)
+        try:
+            return data['result']['tracks']
+        except:
+            return []
 
     # 热门歌手 http://music.163.com/#/discover/artist/
     def top_artists(self, offset=0, limit=100):
         action = 'http://music.163.com/api/artist/top?offset=' + str(offset) + '&total=false&limit=' + str(limit)
-        return self.httpRequest('GET', action)
+        data = self.httpRequest('GET', action)
+        try:
+            return data['artists']
+        except:
+            return []
 
     # 热门单曲 http://music.163.com/#/discover/toplist 50
     def top_songlist(self, offset=0, limit=100):
@@ -96,21 +130,29 @@ class Api:
         connection = requests.get(action, headers=self.header, timeout=5)
         connection.encoding = 'UTF-8'
         songids = re.findall(r'/song\?id=(\d+)', connection.text)
+        if songids == []:
+            return []
+        # 去重
+        songids = uniq(songids)
         return self.songs_detail(songids)
 
-    # 歌手单曲 hotSongs
+    # 歌手单曲
     def artists(self, artist_id):
         action = 'http://music.163.com/api/artist/' + str(artist_id)
-        return self.httpRequest('GET', action)
-        # connection = requests.get(action, headers=self.header, timeout=5)
-        # connection.encoding = 'UTF-8'
-        # connection = connection.text.split('g_hotsongs = ')[1].split(';</script>')[0]
-        # return json.loads(connection)
+        data = self.httpRequest('GET', action)
+        try:
+            return data['hotSongs']
+        except:
+            return []
 
     # album id --> song id set
     def album(self, album_id):
         action = 'http://music.163.com/api/album/' + str(album_id)
-        return self.httpRequest('GET', action)
+        data = self.httpRequest('GET', action)
+        try:
+            return data['album']['songs']
+        except:
+            return []
 
     # song ids --> song urls ( details )
     def songs_detail(self, ids, offset=0):
@@ -118,16 +160,47 @@ class Api:
         tmpids = tmpids[0:100]
         tmpids = map(str, tmpids)
         action = 'http://music.163.com/api/song/detail?ids=[' + (',').join(tmpids) + ']'
-        return self.httpRequest('GET', action)
+        data = self.httpRequest('GET', action)
+        try:
+            return data['songs']
+        except:
+            return []
 
     # song id --> song url ( details )
     def song_detail(self, music_id):
-        action = "http://music.163.com/api/song/detail/?id=" + music_id + "&ids=[" + music_id + "]"
-        return self.httpRequest('GET', action)
+        action = "http://music.163.com/api/song/detail/?id=" + str(music_id) + "&ids=[" + str(music_id) + "]"
+        data = self.httpRequest('GET', action)
+        try:
+            return data['songs']
+        except:
+            return []
+
+
+    # 今日最热（0）, 本周最热（10），历史最热（20），最新节目（30）
+    def djchannels(self, stype=0, offset=0, limit=50):
+        action = 'http://music.163.com/discover/djchannel?type=' + str(stype) + '&offset=' + str(offset) + '&limit=' + str(limit)
+        connection = requests.get(action, headers=self.header, timeout=5)
+        connection.encoding = 'UTF-8'
+        channelids = re.findall(r'/dj\?id=(\d+)', connection.text)
+        channelids = uniq(channelids)
+        return self.channel_detail(channelids)        
+
+    # DJchannel ( id, channel_name ) ids --> song urls ( details )
+    # 将 channels 整理为 songs 类型
+    def channel_detail(self, channelids, offset=0):
+        channels = []
+        for i in range(0, len(channelids)):
+            action = 'http://music.163.com/api/dj/program/detail?id=' + str(channelids[i])
+            data = self.httpRequest('GET', action)
+            # return type(data['program']['mainSong'])
+            channel = self.dig_info( data['program']['mainSong'], 'channels' )
+            channels.append(channel)
+
+        return channels
 
     def dig_info(self, data ,dig_type):
+        temp = []
         if dig_type == 'songs':
-            temp = []
             for i in range(0, len(data) ):
                 song_info = {
                     'song_id': data[i]['id'],
@@ -147,9 +220,7 @@ class Api:
 
                 temp.append(song_info)
 
-            return temp
-
-        if dig_type == 'artists':
+        elif dig_type == 'artists':
             temp = []
             for i in range(0, len(data) ):
                 artists_info = {
@@ -161,8 +232,7 @@ class Api:
 
             return temp
 
-        if dig_type == 'albums':
-            temp = []
+        elif dig_type == 'albums':
             for i in range(0, len(data) ):
                 albums_info = {
                     'album_id': data[i]['id'],
@@ -170,10 +240,8 @@ class Api:
                     'artists_name': data[i]['artist']['name']
                 }
                 temp.append(albums_info)
-            return temp
 
-        if dig_type == 'playlists':
-            temp = []
+        elif dig_type == 'playlists':
             for i in range(0, len(data) ):
                 playlists_info = {
                     'playlist_id': data[i]['id'],
@@ -182,4 +250,15 @@ class Api:
                 }
                 temp.append(playlists_info)        
 
-            return temp
+
+        elif dig_type == 'channels':
+            channel_info = {
+                'song_id': data['id'],
+                'song_name': data['name'],
+                'artist': data['artists'][0]['name'],
+                'album_name': 'DJ节目',
+                'mp3_url': data['mp3Url']
+                }
+            temp = channel_info    
+
+        return temp

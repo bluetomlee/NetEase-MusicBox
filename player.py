@@ -13,6 +13,7 @@ import os
 import signal
 from ui import Ui
 
+
 # carousel x in [left, right]
 carousel = lambda left, right, x: left if (x>right) else (right if x<left else x)
 
@@ -20,6 +21,8 @@ carousel = lambda left, right, x: left if (x>right) else (right if x<left else x
 class Player:
 
     def __init__(self):
+        self.ui = Ui()
+        self.datatype = 'songs'
         self.popen_handler = None
         # flag stop, prevent thread start
         self.playing_flag = False
@@ -49,29 +52,41 @@ class Player:
     def recall(self):
         self.playing_flag = True
         item = self.songs[ self.idx ]
-        Ui().build_playinfo(item['song_name'], item['artist'], item['album_name'])
+        self.ui.build_playinfo(item['song_name'], item['artist'], item['album_name'])
         self.popen_recall(self.recall, item['mp3_url'])
 
-    def play(self, songs, idx):
+    def play(self, datatype, songs, idx):
+        # if same playlists && idx --> same song :: pause/resume it
+        self.datatype = datatype
 
-        # if same playlists, same song , stop it
-        if idx == self.idx and songs == self.songs:
-            if self.pause_flag:
-                self.resume()
+        if datatype == 'songs' or datatype == 'djchannels':
+            if idx == self.idx and songs == self.songs:
+                if self.pause_flag:
+                    self.resume()
+                else:
+                    self.pause()
+
             else:
-                self.pause()
+                if datatype == 'songs' or datatype == 'djchannels':
+                    self.songs = songs
+                    self.idx = idx
 
+                # if it's playing
+                if self.playing_flag:
+                    self.switch()
+
+                # start new play
+                else:
+                    self.recall()
+        # if current menu is not song, pause/resume
         else:
-            self.songs = songs
-            self.idx = idx
-
-            # if it's playing
             if self.playing_flag:
-                self.switch()
-
-            # start new play
+                if self.pause_flag:
+                    self.resume()
+                else:
+                    self.pause()
             else:
-                self.recall()
+                pass
 
     # play another   
     def switch(self):
@@ -88,10 +103,14 @@ class Player:
     def pause(self):
         self.pause_flag = True
         os.kill(self.popen_handler.pid, signal.SIGSTOP)
+        item = self.songs[ self.idx ]
+        self.ui.build_playinfo(item['song_name'], item['artist'], item['album_name'], pause=True)
 
     def resume(self):
         self.pause_flag = False
         os.kill(self.popen_handler.pid, signal.SIGCONT)
+        item = self.songs[ self.idx ]
+        self.ui.build_playinfo(item['song_name'], item['artist'], item['album_name'])
 
     def next(self):
         self.stop()
