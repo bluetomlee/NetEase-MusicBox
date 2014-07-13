@@ -92,11 +92,11 @@ class Player:
     def switch(self):
         self.stop()
         # wait process be killed
-        time.sleep(1)
+        time.sleep(0.01)
         self.recall()
 
     def stop(self):
-        if self.playing_flag:
+        if self.playing_flag and self.popen_handler:
             self.playing_flag = False
             self.popen_handler.kill()
 
@@ -114,12 +114,12 @@ class Player:
 
     def next(self):
         self.stop()
-        time.sleep(1)
+        time.sleep(0.01)
         self.idx = carousel(0, len(self.songs)-1, self.idx+1 )
-        self.recall()    
+        self.recall()
 
     def prev(self):
         self.stop()
-        time.sleep(1)
+        time.sleep(0.01)
         self.idx = carousel(0, len(self.songs)-1, self.idx-1 )
         self.recall()

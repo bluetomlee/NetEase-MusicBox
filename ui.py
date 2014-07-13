@@ -19,7 +19,8 @@ class Ui:
         curses.start_color()
         curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)
         curses.init_pair(2, curses.COLOR_CYAN, curses.COLOR_BLACK)
-        curses.init_pair(3, curses.COLOR_RED, curses.COLOR_BLACK)        
+        curses.init_pair(3, curses.COLOR_RED, curses.COLOR_BLACK)              
+        curses.init_pair(4, curses.COLOR_YELLOW, curses.COLOR_BLACK)        
 
     def build_playinfo(self, song_name, artist, album_name, pause=False):
         # refresh top 2 line
@@ -28,14 +29,14 @@ class Ui:
     	self.screen.move(2,1)
     	self.screen.clrtoeol()
     	if pause:
-    		self.screen.addstr(1, 6, '-，- z Z Z', curses.color_pair(3))
+    		self.screen.addstr(1, 6, '_ _ z Z Z', curses.color_pair(3))
     	else:
         	self.screen.addstr(1, 6, '♫  ♪ ♫  ♪', curses.color_pair(3))
-        self.screen.addstr(1, 19, song_name + '   -   ' + artist + '  < ' + album_name + ' >', curses.color_pair(2))
+        self.screen.addstr(1, 19, song_name + '   -   ' + artist + '  < ' + album_name + ' >', curses.color_pair(4))
     	self.screen.refresh() 	
 
     def build_loading(self):
-        self.screen.addstr(6, 19, 'loading...', curses.color_pair(2))
+        self.screen.addstr(6, 19, '享受高品质音乐，loading...', curses.color_pair(1))
         self.screen.refresh()        
 
     def build_menu(self, datatype, title, datalist, offset, index, step):
@@ -45,7 +46,7 @@ class Ui:
         self.screen.addstr(4, 19, title, curses.color_pair(1))
 
         if len(datalist) == 0:
-            self.screen.addstr(8, 19, '这里空空如也 -，-')
+            self.screen.addstr(8, 19, '这里什么都没有 -，-')
 
         else:
             if datatype == 'main':
@@ -97,41 +98,52 @@ class Ui:
     	netease = self.netease
         if stype == 'songs':
             song_name = self.get_param('搜索歌曲：')
-            data = netease.search(song_name, stype=1)
-            song_ids = []
-            if 'songs' in data['result']:
-                if 'mp3Url' in data['result']['songs']:
-                    songs = data['result']['songs']
+            try:
+                data = netease.search(song_name, stype=1)
+                song_ids = []
+                if 'songs' in data['result']:
+                    if 'mp3Url' in data['result']['songs']:
+                        songs = data['result']['songs']
 
-                # search song result do not has mp3Url
-                # send ids to get mp3Url
-                else:
-                    for i in range(0, len(data['result']['songs']) ):
-                        song_ids.append( data['result']['songs'][i]['id'] )
-                    data = netease.songs_detail(song_ids)
-                    songs = data['songs']
-                return netease.dig_info(songs, 'songs')
+                    # if search song result do not has mp3Url
+                    # send ids to get mp3Url
+                    else:
+                        for i in range(0, len(data['result']['songs']) ):
+                            song_ids.append( data['result']['songs'][i]['id'] )
+                        songs = netease.songs_detail(song_ids)
+                    return netease.dig_info(songs, 'songs')
+            except:
+                return []
         
         elif stype == 'artists':
             artist_name = self.get_param('搜索艺术家：')
-            data = netease.search(artist_name, stype=100)
-            if 'artists' in data['result']:
-                artists = data['result']['artists']
-                return netease.dig_info(artists, 'artists')
+            try:
+                data = netease.search(artist_name, stype=100)
+                if 'artists' in data['result']:
+                    artists = data['result']['artists']
+                    return netease.dig_info(artists, 'artists')
+            except:
+                return []
 
         elif stype == 'albums':
             artist_name = self.get_param('搜索专辑：')
-            data = netease.search(artist_name, stype=10)
-            if 'albums' in data['result']:
-                albums = data['result']['albums']
-                return netease.dig_info(albums, 'albums')
+            try:
+                data = netease.search(artist_name, stype=10)
+                if 'albums' in data['result']:
+                    albums = data['result']['albums']
+                    return netease.dig_info(albums, 'albums')
+            except:
+                return []
 
         elif stype == 'playlists':
             artist_name = self.get_param('搜索网易精选集：')
-            data = netease.search(artist_name, stype=1000)
-            if 'playlists' in data['result']:
-                playlists = data['result']['playlists']
-                return netease.dig_info(playlists, 'playlists')
+            try:
+                data = netease.search(artist_name, stype=1000)
+                if 'playlists' in data['result']:
+                    playlists = data['result']['playlists']
+                    return netease.dig_info(playlists, 'playlists')
+            except:
+                return []
 
         return []
 
@@ -158,7 +170,7 @@ class Ui:
             x = self.build_login_error()
             if x == ord('1'):
                return self.build_login()
-            elif x == ord('2'):
+            else:
                 return -1
         else:
             return [login_info, account]        
@@ -166,7 +178,7 @@ class Ui:
     def build_login_error(self):
         self.screen.move(4,1)
         self.screen.clrtobot()
-        self.screen.addstr(7, 19, '用户名账户出错啦 ~ ~:', curses.color_pair(1))
+        self.screen.addstr(7, 19, '艾玛，登录信息好像不对呢 (O_O)#', curses.color_pair(1))
         self.screen.addstr(10,19, '[1] 再试一次')
         self.screen.addstr(11,19, '[2] 稍后再试')
         self.screen.addstr(14,19, '请键入对应数字:', curses.color_pair(2))
