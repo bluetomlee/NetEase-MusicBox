@@ -17,7 +17,8 @@ def uniq(arr):
     arr2.sort(key=arr.index)
     return arr2
 
-default_timeout = 5
+default_timeout = 10
+
 
 class NetEase:
     def __init__(self):
