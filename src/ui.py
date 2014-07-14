@@ -92,6 +92,16 @@ class Ui:
                     else:
                         self.screen.addstr(i - offset +8, 19, str(i) + '. ' + datalist[i]['song_name'])                
 
+            elif datatype == 'help':
+                for i in range(offset, min( len(datalist), offset+step) ):
+                    if i == index:
+                        self.screen.addstr(i - offset +8, 16, '-> ' + str(i) + '. \'' + datalist[i][0].upper() + '\'   ' + datalist[i][1] + '   ' + datalist[i][2], curses.color_pair(2))
+                    else:
+                        self.screen.addstr(i - offset +8, 19, str(i) + '. \'' + datalist[i][0].upper() + '\'   ' + datalist[i][1] + '   ' + datalist[i][2])                
+                self.screen.addstr(20, 6, 'NetEase-MusicBox 基于Python，所有版权音乐来源于网易，本地不做任何保存')
+                self.screen.addstr(21, 10, '按 [G] 到 Github 了解更多信息，帮助改进，或者Star表示支持~~')
+                self.screen.addstr(22, 19, 'Build with love to music by @vellow')
+
         self.screen.refresh()    
 
     def build_search(self, stype):
@@ -150,7 +160,7 @@ class Ui:
     def build_search_menu(self):
         self.screen.move(4,1)
         self.screen.clrtobot()
-    	self.screen.addstr(7, 19, '选择搜索类型:', curses.color_pair(1))
+    	self.screen.addstr(8, 19, '选择搜索类型:', curses.color_pair(1))
     	self.screen.addstr(10,19, '[1] 歌曲')
     	self.screen.addstr(11,19, '[2] 艺术家')
     	self.screen.addstr(12,19, '[3] 专辑')
@@ -178,7 +188,7 @@ class Ui:
     def build_login_error(self):
         self.screen.move(4,1)
         self.screen.clrtobot()
-        self.screen.addstr(7, 19, '艾玛，登录信息好像不对呢 (O_O)#', curses.color_pair(1))
+        self.screen.addstr(8, 19, '艾玛，登录信息好像不对呢 (O_O)#', curses.color_pair(1))
         self.screen.addstr(10,19, '[1] 再试一次')
         self.screen.addstr(11,19, '[2] 稍后再试')
         self.screen.addstr(14,19, '请键入对应数字:', curses.color_pair(2))

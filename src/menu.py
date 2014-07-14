@@ -3,25 +3,6 @@
 
 '''
 网易云音乐 Menu
-shortcut = {
-    'q': 'Quit',
-    'j': 'Down',
-    'k': 'Up',
-    'h': 'Back',
-    'l': 'Forward',
-    'u': 'Prev Page',
-    'd': 'Next Page',
-    'f': 'Search',
-    '[': 'Prev song',
-    ']': 'Next song',
-    ' ': 'Play/Pause',
-    'p': 'Load Present play list',
-    'a': 'Append to myDJ list',
-    'z': 'Load myDJ list',
-    's': 'Star it, add to collection',
-    'c': 'Load collection',
-    'r': 'Remove from current list'
-}
 '''
 
 import curses
@@ -30,19 +11,41 @@ import sys
 import os
 import json
 import time
+import webbrowser
 from api import NetEase
 from player import Player
 from ui import Ui
 
 home = os.path.expanduser("~")
-if os.path.isdir(home + '/cli-musicbox') is False:
-    os.mkdir(home+'/cli-musicbox')
+if os.path.isdir(home + '/netease-musicbox') is False:
+    os.mkdir(home+'/netease-musicbox')
 
 locale.setlocale(locale.LC_ALL, "")
 code = locale.getpreferredencoding()   
 
 # carousel x in [left, right]
 carousel = lambda left, right, x: left if (x>right) else (right if x<left else x)
+
+shortcut = [
+    ['j', 'Down      ', '下移'],
+    ['k', 'Up        ', '上移'],
+    ['h', 'Back      ', '后退'],
+    ['l', 'Forward   ', '前进'],
+    ['u', 'Prev page ', '上一页'],
+    ['d', 'Next page ', '下一页'],
+    ['f', 'Search    ', '快速搜索'],
+    ['[', 'Prev song ', '上一曲'],
+    [']', 'Next song ', '下一曲'],
+    [' ', 'Play/Pause', '播放/暂停'],
+    ['m', 'Menu      ', '主菜单'],
+    ['p', 'Present   ', '当前播放列表'],
+    ['a', 'Add       ', '添加曲目到打碟'],
+    ['z', 'DJ list   ', '打碟列表'],
+    ['s', 'Star      ', '添加到收藏'],
+    ['c', 'Collection', '收藏列表'],
+    ['r', 'Remove    ', '删除当前条目'],
+    ['q', 'Quit      ', '退出']
+]
 
 
 class Menu:
@@ -51,7 +54,7 @@ class Menu:
         sys.setdefaultencoding('UTF-8')
         self.datatype = 'main'
         self.title = '网易云音乐'
-        self.datalist = ['排行榜', '艺术家', '新碟上架', '精选歌单', '我的歌单', 'DJ节目', '打碟', '收藏', '搜索']
+        self.datalist = ['排行榜', '艺术家', '新碟上架', '精选歌单', '我的歌单', 'DJ节目', '打碟', '收藏', '搜索', '帮助']
         self.offset = 0
         self.index = 0
         self.presentsongs = []
@@ -65,9 +68,8 @@ class Menu:
         self.djstack = []
         self.userid = None
         self.username = None
-        self.lock = False
         try:
-            sfile = file(home + "/cli-musicbox/flavor.json",'r')
+            sfile = file(home + "/netease-musicbox/flavor.json",'r')
             data = json.loads(sfile.read())
             self.collection = data['collection']
             self.account = data['account']
@@ -122,8 +124,8 @@ class Menu:
                 self.index = (index+step)//step*step
 
             # 前进
-            elif key == ord('l'):
-                if self.datatype == 'songs' or self.datatype == 'djchannels':
+            elif key == ord('l') or key == 10:
+                if self.datatype == 'songs' or self.datatype == 'djchannels' or self.datatype == 'help':
                     continue
                 self.ui.build_loading()
                 self.dispatch_enter(idx)
@@ -221,11 +223,15 @@ class Menu:
                     self.offset = 0
                     self.index = 0                    
 
+            elif key == ord('g'):
+                if datatype == 'help':
+                    webbrowser.open_new_tab('https://github.com/vellow/NetEase-MusicBox')
+
             self.ui.build_menu(self.datatype, self.title, self.datalist, self.offset, self.index, self.step)
 
 
         self.player.stop()
-        sfile = file(home + "/cli-musicbox/flavor.json", 'w')
+        sfile = file(home + "/netease-musicbox/flavor.json", 'w')
         data = {
             'account': self.account,
             'collection': self.collection
@@ -347,6 +353,12 @@ class Menu:
         # 搜索
         elif idx == 8:
             self.search()
+
+        # 帮助
+        elif idx == 9:
+            self.datatype = 'help'
+            self.title += ' > 帮助'
+            self.datalist = shortcut
 
         self.offset = 0
         self.index = 0 
