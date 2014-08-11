@@ -17,8 +17,9 @@ from player import Player
 from ui import Ui
 
 home = os.path.expanduser("~")
-if os.path.isdir(home + '/netease-musicbox') is False:
-    os.mkdir(home+'/netease-musicbox')
+configdir = home + '/.netease-msuicbox'
+if os.path.isdir(configdir) is False:
+    os.mkdir(configdir)
 
 locale.setlocale(locale.LC_ALL, "")
 code = locale.getpreferredencoding()   
@@ -69,7 +70,7 @@ class Menu:
         self.userid = None
         self.username = None
         try:
-            sfile = file(home + "/netease-musicbox/flavor.json",'r')
+            sfile = file(configdir + "/flavor.json",'r')
             data = json.loads(sfile.read())
             self.collection = data['collection']
             self.account = data['account']
@@ -231,7 +232,7 @@ class Menu:
 
 
         self.player.stop()
-        sfile = file(home + "/netease-musicbox/flavor.json", 'w')
+        sfile = file(configdir + "/flavor.json", 'w')
         data = {
             'account': self.account,
             'collection': self.collection
