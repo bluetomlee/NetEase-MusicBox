@@ -8,6 +8,7 @@
 
 import subprocess
 import threading
+import random
 import time
 import os
 import signal
@@ -112,14 +113,24 @@ class Player:
         item = self.songs[ self.idx ]
         self.ui.build_playinfo(item['song_name'], item['artist'], item['album_name'])
 
-    def next(self):
+    def next(self, mode):
         self.stop()
         time.sleep(0.01)
-        self.idx = carousel(0, len(self.songs)-1, self.idx+1 )
+        if mode == 'list':
+            self.idx = carousel(0, len(self.songs)-1, self.idx+1 )
+        elif mode == 'single':
+            pass
+        elif mode == 'random':
+            self.idx = random.randint(0, len(self.songs)-1)
         self.recall()
 
-    def prev(self):
+    def prev(self, mode):
         self.stop()
         time.sleep(0.01)
-        self.idx = carousel(0, len(self.songs)-1, self.idx-1 )
+        if mode == 'list':
+            self.idx = carousel(0, len(self.songs)-1, self.idx-1 )
+        elif mode == 'single':
+            pass
+        elif mode == 'random':
+            self.idx = random.randint(0, len(self.songs)-1)
         self.recall()

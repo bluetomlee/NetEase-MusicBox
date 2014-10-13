@@ -31,6 +31,9 @@ NetEase-MusicBox
 	<tr> <td>[</td> <td>Prev song</td> <td>上一曲</td> </tr>
 	<tr> <td>]</td> <td>Next song</td> <td>下一曲</td> </tr>
 	<tr> <td>Space</td> <td>Play/Pause</td> <td>播放/暂停</td> </tr>
+	<tr> <td>,</td> <td>Play in list mode</td> <td>列表循环（默认）</td> </tr>
+	<tr> <td>.</td> <td>Play in single mode</td> <td>单曲循环</td> </tr>
+	<tr> <td>/</td> <td>Play in random mode</td> <td>随机播放</td> </tr>
 	<tr> <td>M</td> <td>Menu</td> <td>主菜单</td> </tr>
 	<tr> <td>P</td> <td>Present</td> <td>当前播放列表</td> </tr>
 	<tr> <td>A</td> <td>Add</td> <td>添加曲目到打碟</td> </tr>
