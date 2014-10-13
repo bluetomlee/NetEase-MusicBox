@@ -27,24 +27,27 @@ code = locale.getpreferredencoding()
 carousel = lambda left, right, x: left if (x>right) else (right if x<left else x)
 
 shortcut = [
-    ['j', 'Down      ', '下移'],
-    ['k', 'Up        ', '上移'],
-    ['h', 'Back      ', '后退'],
-    ['l', 'Forward   ', '前进'],
-    ['u', 'Prev page ', '上一页'],
-    ['d', 'Next page ', '下一页'],
-    ['f', 'Search    ', '快速搜索'],
-    ['[', 'Prev song ', '上一曲'],
-    [']', 'Next song ', '下一曲'],
-    [' ', 'Play/Pause', '播放/暂停'],
-    ['m', 'Menu      ', '主菜单'],
-    ['p', 'Present   ', '当前播放列表'],
-    ['a', 'Add       ', '添加曲目到打碟'],
-    ['z', 'DJ list   ', '打碟列表'],
-    ['s', 'Star      ', '添加到收藏'],
-    ['c', 'Collection', '收藏列表'],
-    ['r', 'Remove    ', '删除当前条目'],
-    ['q', 'Quit      ', '退出']
+    ['j', 'Down       ', '下移'],
+    ['k', 'Up         ', '上移'],
+    ['h', 'Back       ', '后退'],
+    ['l', 'Forward    ', '前进'],
+    ['u', 'Prev page  ', '上一页'],
+    ['d', 'Next page  ', '下一页'],
+    ['f', 'Search     ', '快速搜索'],
+    ['[', 'Prev song  ', '上一曲'],
+    [']', 'Next song  ', '下一曲'],
+    [' ', 'Play/Pause ', '播放/暂停'],
+    [',', 'list mode  ', '列表循环'],
+    ['.', 'single mode', '单曲循环'],
+    ['/', 'random mode', '随机播放'],
+    ['m', 'Menu       ', '主菜单'],
+    ['p', 'Present    ', '当前播放列表'],
+    ['a', 'Add        ', '添加曲目到打碟'],
+    ['z', 'DJ list    ', '打碟列表'],
+    ['s', 'Star       ', '添加到收藏'],
+    ['c', 'Collectio n', '收藏列表'],
+    ['r', 'Remove     ', '删除当前条目'],
+    ['q', 'Quit       ', '退出']
 ]
 
 
@@ -68,6 +71,7 @@ class Menu:
         self.djstack = []
         self.userid = None
         self.username = None
+        self.playmode = 'list'
         try:
             sfile = file(home + "/netease-musicbox/flavor.json",'r')
             data = json.loads(sfile.read())
@@ -150,13 +154,25 @@ class Menu:
 
             # 播放下一曲
             elif key == ord(']'):
-                self.player.next()
+                self.player.next(self.playmode)
                 time.sleep(0.1)
 
             # 播放上一曲
             elif key == ord('['):
-                self.player.prev()
+                self.player.prev(self.playmode)
                 time.sleep(0.1)
+
+            # 列表循环
+            elif key == ord(','):
+                self.playmode = 'list'
+
+            # 单曲循环
+            elif key == ord('.'):
+                self.playmode = 'single'
+
+            # 随机播放
+            elif key == ord('/'):
+                self.playmode = 'random'
 
             # 播放、暂停
             elif key == ord(' '):
