@@ -8,6 +8,7 @@
 
 import subprocess
 import threading
+import random
 import time
 import os
 import signal
@@ -27,6 +28,7 @@ class Player:
         # flag stop, prevent thread start
         self.playing_flag = False
         self.pause_flag = False
+        self.playmode = 'list'
         self.songs = []
         self.idx = 0
 
@@ -41,7 +43,7 @@ class Player:
             self.popen_handler = subprocess.Popen(['mpg123', popenArgs], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             self.popen_handler.wait()
             if self.playing_flag:
-                self.idx = carousel(0, len(self.songs)-1, self.idx+1 )
+                self.pick_song()
                 onExit()
             return
         thread = threading.Thread(target=runInThread, args=(onExit, popenArgs))
@@ -115,11 +117,20 @@ class Player:
     def next(self):
         self.stop()
         time.sleep(0.01)
-        self.idx = carousel(0, len(self.songs)-1, self.idx+1 )
+        self.pick_song()
         self.recall()
 
     def prev(self):
         self.stop()
         time.sleep(0.01)
-        self.idx = carousel(0, len(self.songs)-1, self.idx-1 )
+        self.pick_song(next=False)
         self.recall()
+
+    def pick_song(self, next=True):
+        if self.playmode == 'list':
+            self.idx = carousel(0, len(self.songs)-1, (self.idx+1) if next else (self.idx-1))
+        elif self.playmode == 'single':
+            pass
+        elif self.playmode == 'random':
+            self.idx = random.randint(0, len(self.songs)-1)
+
