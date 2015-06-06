@@ -32,6 +32,7 @@ def search_music(q, limit):
 				})
 		outputs = {
 			"error"		:	False,
+			"type"		:	"music",
 			"musics"	:	outputs
 		}
 		return jsonify(outputs)
