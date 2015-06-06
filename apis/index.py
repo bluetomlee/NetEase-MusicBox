@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #encoding: UTF-8
 from api import NetEase
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 import requests
 import json
 
@@ -35,6 +35,11 @@ def search_music(q, limit):
 			"musics"	:	outputs
 		}
 		return json.dumps(outputs, indent=4)
+
+@app.route('/music/search', methods=['POST'])
+def search():
+	q = request.form['content']
+	return search_music(q, 1)
 	
 @app.route("/weather/<location>")
 def weather(location):
@@ -52,5 +57,10 @@ def weather(location):
 			"weathers"	:	r["results"][0]['weather_data']
 			})
 
+@app.route('/weather', methods=['POST'])
+def check_weather():
+	location = request.form['content']
+	return weather(location)
+
 if __name__ == '__main__':
-	app.run(host='0.0.0.0', port=80)
+	app.run(host='0.0.0.0', port=80,debug=True)
