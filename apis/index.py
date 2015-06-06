@@ -34,7 +34,7 @@ def search_music(q, limit):
 			"error"		:	False,
 			"musics"	:	outputs
 		}
-		return json.dumps(outputs, indent=4)
+		return jsonify(outputs)
 
 @app.route('/music/search', methods=['POST'])
 def search():
