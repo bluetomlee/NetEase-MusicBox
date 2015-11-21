@@ -125,7 +125,7 @@ class Menu:
 
             # 前进
             elif key == ord('l') or key == 10:
-                if self.datatype == 'songs' or self.datatype == 'djchannels' or self.datatype == 'help':
+                if self.datatype == 'songs' or self.datatype == 'djchannels' or self.datatype == 'help' or len(self.datalist) <= 0:
                     continue
                 self.ui.build_loading()
                 self.dispatch_enter(idx)
